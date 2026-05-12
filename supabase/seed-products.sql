@@ -1,0 +1,3 @@
+-- Deprecated for UUID schema: use `supabase/schema.sql` instead.
+-- It creates `products` / `orders`, RLS policies, and inserts sample rows
+-- with `category` and `is_featured` for Best Sellers + By Occasion.
