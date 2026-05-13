@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { supabase } from '../supabaseClient'
+import { supabase, isSupabaseConfigured } from '../supabaseClient'
 import ProductCard from '../components/ProductCard'
 import OrderFormModal from '../components/OrderFormModal'
 
@@ -56,20 +56,41 @@ export default function Home() {
     async function load() {
       setLoading(true)
       setError(null)
-      const { data, error: fetchError } = await supabase
-        .from('products')
-        .select('id, name, description, price, image_url, category, is_featured')
-        .order('name', { ascending: true })
-
-      if (cancelled) return
-
-      if (fetchError) {
-        setError(fetchError.message)
+      if (!isSupabaseConfigured) {
+        setLoading(false)
         setProducts([])
-      } else {
-        setProducts(data ?? [])
+        setError('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env, then restart npm run dev.')
+        return
       }
-      setLoading(false)
+
+      try {
+        const { data, error: fetchError } = await supabase
+          .from('products')
+          .select('id, name, description, price, image_url, category, is_featured')
+          .order('name', { ascending: true })
+
+        if (cancelled) return
+
+        if (fetchError) {
+          setError(fetchError.message)
+          setProducts([])
+        } else {
+          setProducts(data ?? [])
+        }
+        setLoading(false)
+      } catch (err) {
+        if (cancelled) return
+        const msg = err?.message || String(err)
+        if (msg === 'Failed to fetch' || err?.name === 'TypeError') {
+          setError(
+            'Cannot reach Supabase (network). Check: Supabase project is not Paused, VPN/firewall, and that VITE_SUPABASE_URL is reachable in your browser, then restart npm run dev.'
+          )
+        } else {
+          setError(msg)
+        }
+        setProducts([])
+        setLoading(false)
+      }
     }
 
     load()
