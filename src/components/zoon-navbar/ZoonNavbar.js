@@ -317,6 +317,9 @@ export default function ZoonNavbar() {
             <span className="mt-0.5 hidden text-[10px] font-semibold uppercase tracking-[0.32em] text-white/65 sm:block">
               Kashmir · Since 1998
             </span>
+            <span className="mt-0.5 hidden text-[10px] font-semibold uppercase tracking-[0.32em] text-white/55 sm:block">
+              Er Sabzar Bhat created
+            </span>
           </Link>
 
           <nav className="hidden items-center justify-center gap-6 md:flex" aria-label="Primary">

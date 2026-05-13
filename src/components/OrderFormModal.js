@@ -1,18 +1,11 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../supabaseClient'
-
-const WHATSAPP_E164 = '917889431806'
-
-function buildWhatsAppUrl({ productName, name, phone, address }) {
-  const lines = [
-    `Hi, I want to order Pashmina: ${productName}`,
-    `Name: ${name}`,
-    `Phone: ${phone}`,
-    `Address: ${address}`,
-  ]
-  const text = lines.join('\n')
-  return `https://wa.me/${WHATSAPP_E164}?text=${encodeURIComponent(text)}`
-}
+import {
+  buildOrderMessage,
+  DEFAULT_WHATSAPP_NUMBER_E164,
+  formatINR,
+  openWhatsApp,
+} from '../utils/whatsapp'
 
 const phoneDigits = (value) => value.replace(/\D/g, '')
 
@@ -20,6 +13,7 @@ export default function OrderFormModal({ product, onClose, onOrderSuccess }) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [address, setAddress] = useState('')
+  const [quantity, setQuantity] = useState(1)
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState(null)
   const [fieldErrors, setFieldErrors] = useState({})
@@ -31,6 +25,7 @@ export default function OrderFormModal({ product, onClose, onOrderSuccess }) {
       setName('')
       setPhone('')
       setAddress('')
+      setQuantity(1)
       setFormError(null)
       setFieldErrors({})
       setSubmitting(false)
@@ -53,11 +48,15 @@ export default function OrderFormModal({ product, onClose, onOrderSuccess }) {
     const trimmedName = name.trim()
     const trimmedAddress = address.trim()
     const digits = phoneDigits(phone)
+    const qty = Number(quantity)
 
     if (!trimmedName) next.name = 'Name is required.'
     if (!trimmedAddress) next.address = 'Address is required.'
     if (!/^\d{10}$/.test(digits)) {
       next.phone = 'Enter a valid 10-digit Indian mobile number (digits only).'
+    }
+    if (!Number.isFinite(qty) || qty < 1 || qty > 99) {
+      next.quantity = 'Enter a quantity between 1 and 99.'
     }
 
     setFieldErrors(next)
@@ -74,14 +73,7 @@ export default function OrderFormModal({ product, onClose, onOrderSuccess }) {
     const trimmedName = name.trim()
     const trimmedAddress = address.trim()
     const digits = phoneDigits(phone)
-
-    // Open before any await (and before setState) so popup counts as user-initiated.
-    let popup = null
-    try {
-      popup = window.open('about:blank', '_blank', 'noopener,noreferrer')
-    } catch {
-      popup = null
-    }
+    const qty = Number(quantity)
 
     setSubmitting(true)
 
@@ -95,32 +87,20 @@ export default function OrderFormModal({ product, onClose, onOrderSuccess }) {
     setSubmitting(false)
 
     if (insertError) {
-      try {
-        popup?.close()
-      } catch {
-        /* ignore */
-      }
       setFormError(insertError.message)
       return
     }
 
-    const url = buildWhatsAppUrl({
+    const text = buildOrderMessage({
       productName: product.name ?? '',
+      price: product.price ?? null,
+      quantity: qty,
       name: trimmedName,
       phone: digits,
       address: trimmedAddress,
     })
 
-    try {
-      if (popup && !popup.closed) {
-        popup.location.href = url
-      } else {
-        const w = window.open(url, '_blank', 'noopener,noreferrer')
-        if (!w || w.closed) window.location.href = url
-      }
-    } catch {
-      window.location.href = url
-    }
+    openWhatsApp({ phoneE164: DEFAULT_WHATSAPP_NUMBER_E164, text })
 
     onOrderSuccess?.()
     onClose()
@@ -162,6 +142,37 @@ export default function OrderFormModal({ product, onClose, onOrderSuccess }) {
         </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4" noValidate>
+          <div className="rounded-2xl border border-stone-200 bg-white/70 px-4 py-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-widest text-stone-500">Order summary</p>
+                <p className="mt-1 truncate text-sm font-semibold text-ink">{product.name || 'Selected product'}</p>
+              </div>
+              <p className="shrink-0 text-sm font-bold text-ink">₹{formatINR(product.price)}</p>
+            </div>
+            <div className="mt-3 flex items-center justify-between gap-3">
+              <label htmlFor="order-qty" className="text-sm font-medium text-ink">
+                Quantity
+              </label>
+              <input
+                id="order-qty"
+                type="number"
+                min={1}
+                max={99}
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                className={`${inputClass} w-28 text-right ${errRing('quantity')}`}
+                aria-invalid={Boolean(fieldErrors.quantity)}
+                aria-describedby={fieldErrors.quantity ? 'err-qty' : undefined}
+              />
+            </div>
+            {fieldErrors.quantity && (
+              <p id="err-qty" className="mt-1 text-sm text-red-600">
+                {fieldErrors.quantity}
+              </p>
+            )}
+          </div>
+
           <div>
             <label htmlFor="order-name" className="block text-sm font-medium text-ink">
               Name
