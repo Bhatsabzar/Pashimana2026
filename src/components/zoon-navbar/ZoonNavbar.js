@@ -7,31 +7,27 @@ import { useNavbarSolidOnScroll } from '../../hooks/useNavbarSolidOnScroll'
 
 const easeLux = [0.22, 1, 0.36, 1]
 
-function PremiumNavLink({ to, end, label, solid }) {
+function PremiumNavLink({ to, end, label }) {
   return (
     <NavLink
       to={to}
       end={end}
-      className={({ isActive }) => {
-        const base =
-          "relative isolate py-2 text-[13px] font-bold uppercase tracking-[0.16em] transition-colors duration-300 after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-center after:rounded-full after:bg-gradient-to-r after:from-[#f0c4c8] after:via-[#fff5f0] after:to-[#f0c4c8] after:transition after:duration-300 after:content-['']"
-        const line = isActive ? 'after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-90'
-        const tone = solid
-          ? isActive
-            ? 'text-white [text-shadow:0_0_20px_rgba(0,0,0,0.35)]'
-            : 'text-[#ebe3df] hover:text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]'
-          : isActive
-            ? 'text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.9),0_0_12px_rgba(0,0,0,0.4)]'
-            : 'text-[#fffaf7] hover:text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.85),0_0_1px_rgba(0,0,0,0.9)]'
-        return [base, line, tone].join(' ')
-      }}
+      className={({ isActive }) =>
+        [
+          'inline-flex items-center justify-center border px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.22em] transition',
+          'focus:outline-none focus:ring-2 focus:ring-[#c9a36a]/60 focus:ring-offset-0',
+          isActive
+            ? 'border-[#c9a36a] bg-[#14110e] text-[#e6c58b] shadow-[0_0_0_1px_rgba(201,163,106,0.25)]'
+            : 'border-transparent text-white/90 hover:border-[#c9a36a]/60 hover:text-white',
+        ].join(' ')
+      }
     >
       {label}
     </NavLink>
   )
 }
 
-function IconButton({ label, children, solid }) {
+function IconButton({ label, children }) {
   return (
     <motion.button
       type="button"
@@ -40,10 +36,7 @@ function IconButton({ label, children, solid }) {
       whileTap={{ scale: 0.96 }}
       transition={{ type: 'spring', stiffness: 420, damping: 22 }}
       className={[
-        'rounded-full p-2.5 transition-colors duration-300',
-        solid
-          ? 'text-[#ebe3df] [text-shadow:0_1px_2px_rgba(0,0,0,0.55)] hover:bg-white/10 hover:text-white'
-          : 'text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.9)] hover:bg-white/15 hover:text-[#fffef9]',
+        'rounded-full p-2.5 text-white/90 transition-colors duration-300 hover:bg-white/10 hover:text-white',
       ].join(' ')}
     >
       {children}
@@ -51,7 +44,7 @@ function IconButton({ label, children, solid }) {
   )
 }
 
-function CategoryDropdown({ solid, mobile, onNavigate }) {
+function CategoryDropdown({ mobile, onNavigate }) {
   const [open, setOpen] = useState(false)
   const closeTimer = useRef(null)
 
@@ -75,13 +68,10 @@ function CategoryDropdown({ solid, mobile, onNavigate }) {
   }
 
   const baseBtn = mobile
-    ? 'flex w-full items-center justify-between rounded-2xl border border-[#f0d4c8]/35 bg-[#2a2224]/70 px-4 py-3.5 text-left text-[13px] font-bold uppercase tracking-[0.18em] text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.75)]'
+    ? 'flex w-full items-center justify-between border border-white/10 bg-white/5 px-4 py-3.5 text-left text-[12px] font-semibold uppercase tracking-[0.22em] text-white'
     : [
-        'group inline-flex items-center gap-1.5 rounded-full border px-4 py-2 text-[13px] font-bold uppercase tracking-[0.16em] transition-all duration-300',
-        solid
-          ? 'border-[#8f7a72] bg-[#2f2829]/90 text-[#f5f0ee] [text-shadow:0_1px_2px_rgba(0,0,0,0.55)] hover:border-[#e8c4b8] hover:text-white'
-          : 'border-white/30 bg-[#1f1518]/65 text-white [text-shadow:0_1px_4px_rgba(0,0,0,0.9)] backdrop-blur-md hover:border-white/50 hover:bg-[#2a1e22]/80',
-        open ? (solid ? 'border-[#e8c4b8] text-white' : 'border-white/50 text-white') : '',
+        'group inline-flex items-center gap-1.5 border border-transparent px-4 py-2 text-[12px] font-semibold uppercase tracking-[0.22em] text-white/90 transition',
+        open ? 'border-[#c9a36a]/70 text-white' : 'hover:border-[#c9a36a]/60 hover:text-white',
       ].join(' ')
 
   if (mobile) {
@@ -131,7 +121,7 @@ function CategoryDropdown({ solid, mobile, onNavigate }) {
       <button type="button" className={baseBtn} aria-expanded={open} aria-haspopup="true">
         <span>Categories</span>
         <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.25 }}>
-          <IconChevronDown className="h-4 w-4 opacity-95" />
+          <IconChevronDown className="h-4 w-4 opacity-90" />
         </motion.span>
       </button>
       <AnimatePresence>
@@ -145,15 +135,8 @@ function CategoryDropdown({ solid, mobile, onNavigate }) {
             onMouseEnter={openMenu}
             onMouseLeave={scheduleClose}
           >
-            <div
-              className={[
-                'overflow-hidden rounded-2xl border shadow-2xl ring-1 backdrop-blur-2xl',
-                solid
-                  ? 'border-[#a88c7c]/50 bg-[#1c1518]/96 ring-[#d4a08c]/10'
-                  : 'border-[#fde8dc]/12 bg-[#2d1f24]/90 ring-[#e8b4b8]/15',
-              ].join(' ')}
-            >
-              <ul className="divide-y divide-[#d4a08c]/12">
+            <div className="overflow-hidden border border-[#c9a36a]/25 bg-black/95 shadow-2xl ring-1 ring-white/10 backdrop-blur-2xl">
+              <ul className="divide-y divide-white/10">
                 {CATEGORY_ITEMS.map((item, i) => (
                   <motion.li
                     key={item.href}
@@ -166,8 +149,8 @@ function CategoryDropdown({ solid, mobile, onNavigate }) {
                       className="block px-5 py-4 transition hover:bg-white/[0.06]"
                       onClick={() => setOpen(false)}
                     >
-                      <p className="text-sm font-bold tracking-wide text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.45)]">{item.label}</p>
-                      <p className="mt-1 text-xs font-medium leading-relaxed text-[#cfc4c0]">{item.description}</p>
+                      <p className="text-sm font-semibold tracking-wide text-white">{item.label}</p>
+                      <p className="mt-1 text-xs leading-relaxed text-white/55">{item.description}</p>
                     </Link>
                   </motion.li>
                 ))}
@@ -180,7 +163,7 @@ function CategoryDropdown({ solid, mobile, onNavigate }) {
   )
 }
 
-function MobileDrawer({ open, onClose, solid }) {
+function MobileDrawer({ open, onClose }) {
   const { pathname } = useLocation()
 
   useEffect(() => {
@@ -267,17 +250,17 @@ function MobileDrawer({ open, onClose, solid }) {
                   transition={{ delay: 0.22, duration: 0.3, ease: easeLux }}
                   className="pt-2"
                 >
-                  <CategoryDropdown solid={solid} mobile onNavigate={onClose} />
+                  <CategoryDropdown mobile onNavigate={onClose} />
                 </motion.div>
               </div>
               <div className="mt-8 flex items-center justify-center gap-2 border-t border-[#d4a08c]/15 pt-6">
-                <IconButton label="Search" solid>
+                <IconButton label="Search">
                   <IconSearch className="h-5 w-5" />
                 </IconButton>
-                <IconButton label="Wishlist" solid>
+                <IconButton label="Wishlist">
                   <IconWishlist className="h-5 w-5" />
                 </IconButton>
-                <IconButton label="Shopping bag" solid>
+                <IconButton label="Shopping bag">
                   <IconCart className="h-5 w-5" />
                 </IconButton>
               </div>
@@ -290,9 +273,9 @@ function MobileDrawer({ open, onClose, solid }) {
                 <Link
                   to="/collection"
                   onClick={onClose}
-                  className="flex w-full items-center justify-center rounded-full bg-gradient-to-r from-[#a84858] via-[#d49084] to-[#a84858] px-6 py-3.5 text-sm font-bold uppercase tracking-[0.18em] text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35)] shadow-lg shadow-[#5c2833]/40 transition hover:brightness-110"
+                  className="flex w-full items-center justify-center gap-2 border border-[#c9a36a] bg-[#c9a36a] px-6 py-3.5 text-sm font-semibold uppercase tracking-[0.22em] text-black shadow-lg shadow-black/40 transition hover:bg-[#d9b27b]"
                 >
-                  Shop now
+                  SHOP NOW <span className="text-black/70">›</span>
                 </Link>
               </motion.div>
             </nav>
@@ -315,67 +298,57 @@ export default function ZoonNavbar() {
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.55, ease: easeLux }}
         className={[
-          'sticky top-0 z-50 border-b transition-all duration-500 ease-out',
-          solid
-            ? 'border-[#c4a89c]/50 bg-gradient-to-b from-[#2a2224] via-[#1f191a] to-[#181116] shadow-[0_12px_40px_-12px_rgba(45,18,28,0.45)] backdrop-blur-2xl'
-            : 'border-white/20 bg-[#1a1214]/78 shadow-[0_10px_36px_-14px_rgba(0,0,0,0.55)] backdrop-blur-2xl',
+          'sticky top-0 z-50 border-b border-white/10 bg-black/90 shadow-[0_12px_30px_-16px_rgba(0,0,0,0.85)] backdrop-blur-xl',
         ].join(' ')}
       >
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#d4a08c]/65 to-transparent"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-[#c9a36a]/55 to-transparent"
           aria-hidden
         />
-        <div className="relative mx-auto flex max-w-7xl items-center justify-between gap-6 px-4 py-3.5 sm:px-6 lg:px-8">
+        <div className="relative mx-auto grid max-w-7xl grid-cols-[auto_1fr_auto] items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
           <Link
             to="/"
             className="group flex shrink-0 flex-col"
             onClick={closeMobile}
           >
-            <span className="font-display text-[1.35rem] font-bold tracking-[0.2em] text-white [text-shadow:0_2px_8px_rgba(0,0,0,0.75),0_0_1px_rgba(0,0,0,0.9)] sm:text-2xl sm:tracking-[0.24em]">
-              ZOON
-              <span className="bg-gradient-to-r from-[#ffe4e8] via-white to-[#f0d4c8] bg-clip-text text-transparent [text-shadow:none] drop-shadow-[0_2px_6px_rgba(0,0,0,0.45)]">
-                PASHMINA
-              </span>
+            <span className="font-display text-[1.4rem] font-semibold tracking-wide text-white sm:text-2xl">
+              ZOONPASHMINA
             </span>
-            <span className="mt-0.5 hidden text-[10px] font-semibold uppercase tracking-[0.32em] text-[#e8ddd8] [text-shadow:0_1px_2px_rgba(0,0,0,0.65)] sm:block">
+            <span className="mt-0.5 hidden text-[10px] font-semibold uppercase tracking-[0.32em] text-white/65 sm:block">
               Kashmir · Since 1998
             </span>
-            <span
-              className="mt-1.5 h-px w-12 origin-left scale-x-75 bg-gradient-to-r from-[#d4a08c] to-transparent transition duration-500 group-hover:scale-x-100"
-              aria-hidden
-            />
           </Link>
 
-          <nav className="hidden items-center gap-8 lg:gap-10 md:flex" aria-label="Primary">
+          <nav className="hidden items-center justify-center gap-6 md:flex" aria-label="Primary">
             {MAIN_NAV.map((item) => (
-              <PremiumNavLink key={item.to} to={item.to} end={item.end} label={item.label} solid={solid} />
+              <PremiumNavLink key={item.to} to={item.to} end={item.end} label={item.label} />
             ))}
-            <CategoryDropdown solid={solid} />
+            <CategoryDropdown />
           </nav>
 
-          <div className="hidden items-center gap-1 md:flex">
-            <IconButton label="Search" solid={solid}>
+          <div className="hidden items-center justify-end gap-2 md:flex">
+            <IconButton label="Search">
               <IconSearch className="h-5 w-5" />
             </IconButton>
-            <IconButton label="Wishlist" solid={solid}>
+            <IconButton label="Wishlist">
               <IconWishlist className="h-5 w-5" />
             </IconButton>
-            <IconButton label="Shopping bag" solid={solid}>
+            <IconButton label="Shopping bag">
               <IconCart className="h-5 w-5" />
             </IconButton>
-            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="ml-3">
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }} className="ml-2">
               <Link
                 to="/collection"
-                className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-[#a84858] via-[#d49084] to-[#a84858] px-6 py-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35)] shadow-lg shadow-[#5c2833]/35 transition hover:brightness-110"
+                className="inline-flex items-center justify-center gap-2 border border-[#c9a36a] bg-[#c9a36a] px-5 py-2.5 text-[12px] font-semibold uppercase tracking-[0.22em] text-black shadow-[0_10px_22px_-14px_rgba(201,163,106,0.65)] transition hover:bg-[#d9b27b]"
               >
-                Shop now
+                SHOP NOW <span className="text-black/70">›</span>
               </Link>
             </motion.div>
           </div>
 
           <motion.button
             type="button"
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/35 bg-[#2a2224]/75 text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.8)] shadow-md backdrop-blur-md transition hover:border-white/55 hover:bg-[#3d3234]/85 md:hidden"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/5 text-white shadow-md backdrop-blur-md transition hover:border-white/35 hover:bg-white/10 md:hidden"
             aria-expanded={mobileOpen}
             aria-controls="zoon-mobile-drawer"
             whileTap={{ scale: 0.94 }}
